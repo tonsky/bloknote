@@ -12,7 +12,8 @@
 (def $sheet  (jq/$ :#sheet))
 (def $titles (jq/$ "#titles"))
 (def pars    (atom []))
-(def user    (atom ""))
+(def user    (atom nil))
+(def sheet   (atom nil))
 
 (defn on-type [e]
   (if (or (cur/maybe-move-cursor e @pars)
@@ -35,7 +36,26 @@
       (.data $li "bloknoteid" id)))
   (.append $titles "<li class='title-new'>[ + Add Bloknote ]</li>"))
 
+(defn save-sheet []
+  (if @sheet
+    (let [text      (str/join "\n" (mapv :text @pars))
+          cur-begin (cur/pos->arr @cur/cur-begin)
+          cur-end   (cur/pos->arr @cur/cur-end)
+          payload   {:text text, :cur-begin cur-begin, :cur-end cur-end}
+          $title    (jq/$ (str "#title-" @sheet))
+          title     (first (str/split text #"\n" 2))]
+      (jq/add-class $title "progress")
+      (jq/text $title title)
+      (jq/xhr [:post (str "/api/" @user "/" @sheet "/")]
+              (clj->js {:payload (pr-str payload)})
+              (fn [_] (jq/remove-class $title "progress"))))))
+
+(defn save-sheet-to []
+  (save-sheet)
+  (js/setTimeout save-sheet-to 2000))
+
 (defn clear-sheet [text]
+  (reset! sheet nil)
   (jq/remove (jq/$ "#sheet p"))
   (reset! pars (edit/split-to-pars text))
   (doseq [par @pars]
@@ -47,9 +67,11 @@
 
 (defn init-sheet [b id]
   (let [{:keys [text cur-begin cur-end]} b]
-    (log "loaded " text)
+    ; (log "loaded " text)
+    (reset! sheet id)
     (reset! pars (edit/split-to-pars text))
     (jq/remove (jq/$ "#sheet .aux"))
+    (jq/remove (jq/$ "#sheet p"))
     (doseq [par @pars]
       (jq/append $sheet (:dom par)))
     (reset! cur/cur-begin (cur/arr->pos cur-begin))
@@ -57,12 +79,12 @@
     (cur/repaint @pars)
     (let [title (first (str/split text #"\n" 2))
           $title (jq/$ (str "#title-" id))]
-      (log "title: " title ", id: #title-" id)
       (jq/text $title title)
       (jq/remove-class $title "progress"))
     (.focus edit/$ta)))
 
 (defn load-sheet [u sheet]
+  (save-sheet)
   (clear-sheet "Loading...")
   (jq/ajax
     (str "/api/" u "/" sheet "/")
@@ -94,6 +116,7 @@
   (jq/bind edit/$ta :blur  (fn [_] (jq/remove-class $sheet :focused)))
   ; (jq/bind (jq/$ :body) :keyup on-type)
   (jq/bind $titles :click on-title-click)
+  (js/setTimeout save-sheet-to 2000)
   (jq/ajax
     (str "/api/" u "/")
     {:success (fn [data] 
@@ -101,14 +124,3 @@
                       {:keys [titles last-opened-id last-opened]} data]
                   (render-titles titles last-opened-id)
                   (init-sheet last-opened last-opened-id)))}))
-                  
-(defn save-sheet [u sheet pars]
-  (let [text      (str/join "\n" (mapv :text pars))
-        cur-begin (cur/pos->arr @cur/cur-begin)
-        cur-end   (cur/pos->arr @cur/cur-end)
-        payload   {:text text, :cur-begin cur-begin, :cur-end cur-end}
-        $title    (jq/$ (str "#title-" sheet))]
-    (jq/add-class $title "progress")
-    (jq/xhr [:post (str "/api/" u "/" sheet "/")]
-            (clj->js {:payload (pr-str payload)})
-            (fn [_] (jq/remove-class $title "progress")))))

@@ -5,7 +5,7 @@
             [bloknote.utils :as u])
   (:use [jayq.util :only [log]]))
 
-(def ^:dynamic *wrapw* 30)      ; wrap width
+(def ^:dynamic *wrapw* 60)      ; wrap width
 (defrecord Line [tags chars-count])
 (defrecord Tag  [text dom])
 (def $ta (jq/$ :#ta))

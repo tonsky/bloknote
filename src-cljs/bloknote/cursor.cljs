@@ -22,7 +22,7 @@
   (Pos. par ln ch))
 
 (def ^:dynamic *chw* 10)        ; char width
-(def ^:dynamic *lh* 30)         ; line height
+(def ^:dynamic *lh*  26)        ; line height
 
 (def cur-begin (atom (Pos. 0 0 0)))
 (def cur-end   (atom (Pos. 0 0 0)))
@@ -113,5 +113,6 @@
   (let [$aux (jq/$ :#aux)
         text (.text $aux)]
     (set! *chw* (/ (.width $aux) (count text)))
+    ; (set! *lh* (.height $aux))
     (jq/remove $aux)
-    (log "Using char width: " *chw* "px")))
+    (log "Using char width: " *chw* "px and height: " *lh*)))

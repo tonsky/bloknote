@@ -1,5 +1,6 @@
 (ns bloknote.server
   (:require [bloknote.data :as data]
+            [clojure.string :as str]
             compojure.core
             compojure.route
             compojure.handler
@@ -44,8 +45,13 @@
   {:body    (pr-str (data/load-db user id))
    :headers {"Content-Type" "text/plain; charset=utf-8"}})
 
+(defn unescape [string]
+  (str/replace 
+    string #"\\x(..)" 
+    (fn [m] (str (char (Integer/parseInt (second m) 16))))))
+
 (defn api-save [user id bloknote]
-  (data/save-db user id (read-string bloknote))
+  (data/save-db user id (read-string (unescape bloknote)))
   {:status 201
    :body (str "Bloknote " id " saved")
    :headers {"Content-Type" "text/plain; charset=utf-8"}})
