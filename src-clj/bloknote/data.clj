@@ -6,9 +6,10 @@
   (file (str "data/" user ".clj")))
 
 (defn read-user [user]
-  (-> (to-file user)
-      slurp
-      read-string))
+  (locking (.intern user)
+    (-> (to-file user)
+        slurp
+        read-string)))
 
 (defn default []
   (rand-nth [
@@ -18,15 +19,17 @@
     {:text "# Great Expectations\n=============\n\nBy Charles Dickens" :cur-begin [3 0 0] :cur-end [3 0 0]}]))
            
 (defn load-db [user id]
-  (let [content (read-user user)]
-    (get-in content [:bloknotes id] (default))))
+  (locking (.intern user)
+    (let [content (read-user user)]
+      (get-in content [:bloknotes id] (default)))))
 
 (defn save-db [user id bloknote]
-  (let [f (to-file user)
-        content (-> (read-user user)
-                    (assoc-in [:bloknotes id] bloknote)
-                    (assoc-in [:last-opened-id] id))]
-    (spit f content)))
+  (locking (.intern user)
+    (let [f (to-file user)
+          content (-> (read-user user)
+                      (assoc-in [:bloknotes id] bloknote)
+                      (assoc-in [:last-opened-id] id))]
+      (spit f content))))
 
 (defn title [b]
   (-> (:text b)
@@ -34,10 +37,11 @@
       first))
 
 (defn list-db [user]
-  (let [content (read-user user)
-        titles  (for [[id b] (:bloknotes content)]
-                     [(title b) id])
-        last-opened-id (:last-opened-id content)]
-    {:titles (sort titles)
-     :last-opened-id last-opened-id 
-     :last-opened (load-db user last-opened-id)}))
+  (locking (.intern user)
+    (let [content (read-user user)
+          titles  (for [[id b] (:bloknotes content)]
+                       [(title b) id])
+          last-opened-id (:last-opened-id content)]
+      {:titles (sort titles)
+       :last-opened-id last-opened-id 
+       :last-opened (load-db user last-opened-id)})))

@@ -106,7 +106,7 @@
         (jq/before $t $li)
         (.click $li)))))
 
-(defn init-user [u]
+(defn ^:export init-user [u]
   (reset! user u)
   (cur/init)
   (edit/init)

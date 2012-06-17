@@ -6,7 +6,8 @@
             compojure.handler
             hiccup.core
             hiccup.page
-            hiccup.element))
+            hiccup.element
+            ring.middleware.reload))
 
 (defn layout [title & body]
   (hiccup.page/html5
@@ -15,8 +16,8 @@
       [:link {:rel "shortcut icon" :href "/i/favicon.ico" :type "image/x-icon"}]
       (hiccup.page/include-css "/i/style.css")
       (hiccup.element/javascript-tag "var CLOSURE_NO_DEPS = true;")
-      (hiccup.page/include-js "/i/xregexp-min.js")
-      (hiccup.page/include-js "/i/xregexp-unicode-base.js")
+      ; (hiccup.page/include-js "/i/xregexp-min.js")
+      ; (hiccup.page/include-js "/i/xregexp-unicode-base.js")
       (hiccup.page/include-js "/i/jquery-1.7.2.min.js")
       [:title title]]
     [:body body]))
@@ -41,7 +42,7 @@
    :headers {"Content-Type" "text/plain; charset=utf-8"}})
 
 (defn api-load [user id]
-  (Thread/sleep 1000)
+  ; (Thread/sleep 1000)
   {:body    (pr-str (data/load-db user id))
    :headers {"Content-Type" "text/plain; charset=utf-8"}})
 
@@ -66,4 +67,6 @@
   (compojure.route/not-found "Page not found"))
 
 (def app
-  (compojure.handler/site main-routes))
+  (ring.middleware.reload/wrap-reload
+    (compojure.handler/site main-routes)
+    {:dirs ["src-clj"]}))
