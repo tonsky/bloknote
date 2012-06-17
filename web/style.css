@@ -1,0 +1,60 @@
+/* http://meyerweb.com/eric/tools/css/reset/ 
+   v2.0 | 20110126 */
+html, body, div, span, applet, object, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video { margin: 0; padding: 0; border: 0; font-size: 100%; font: inherit; vertical-align: baseline; }
+
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section { display: block; }
+ol, ul { list-style: none; }
+blockquote, q { quotes: none; }
+blockquote:before, blockquote:after, q:before, q:after { content: ''; content: none;}
+table { border-collapse: collapse; border-spacing: 0; }
+
+/* Fonts */
+
+/* common elements */
+* { box-sizing: border-box; -moz-box-sizing: border-box; -ms-box-sizing: border-box; -webkit-box-sizing: border-box; }
+
+body, textarea { font: 18px/30px Consolas, 'Andale Mono', Monaco, Menlo, InconsolataMedium, 'Droid Sans Mono', monospace; letter-spacing: 0px;  }
+body {  background: #CCC url(body.png); }
+
+::selection { background: hsl(46, 100%, 50%); color: hsl(47, 44%, 6%); }
+
+#sheet { 
+  width: 600px;
+  min-height: 700px;
+  border: 0px solid #888;
+  box-shadow: rgba(0,0,0,0.3) 0 2px 5px;
+  margin: 20px auto;
+  padding: 20px 50px 20px 20px;
+  background: url(bg.png);
+  color: #666;
+  position: relative;
+}
+#sheet.focused, #ta:focus { outline: 4px solid rgba(0,150,255,0.3); outline-offset: 0px; color: #333; }
+#ta { position: absolute; right: 20px; top: 20px; width: 100px; height: 100px; }
+#cur-begin, #cur-end { background: url(cursor.png); width: 4px; height: 30px; position: absolute;}
+#cur-begin { margin-left: 67px; background-position: 0 0; }
+#cur-end { margin-left: 69px; background-position: -2px 0; }
+
+#sheet p { 
+  min-height: 30px; margin: 0 0 0 50px; padding: 0; font-weight: normal; 
+  white-space: pre-wrap;
+/*white-space: pre; word-wrap: break-word;*/ 
+}
+#sheet u { text-decoration: none; margin-left: 50px; }
+.tag_header { font-weight: bold; }
+#sheet.focused .tag_header {  color: #000 }
+#sheet .block { }
+
+#sheet i {  }
+#sheet a { text-decoration: none; color: #069; }
+#sheet a:active { position: relative; top: 1px; }
+#sheet a:hover { border-bottom: 2px solid hsl(200, 100%, 30%); }
+#sheet a:visited { color: #930; }
+#sheet a:visited:hover { border-color: #930; }
+
+#sheet b { border-bottom: 2px solid #555; font-weight: normal; }
+#sheet strong { font-weight: bold; }
+/*.block { padding-left: 40px; }
+.numlist, .list { margin-left: 40px; } */
+
