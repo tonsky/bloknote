@@ -104,10 +104,9 @@
   ; (log "Collapsed " (cmp @cur-begin @cur-end))
   (zero? (cmp @cur-begin @cur-end)))
 
-(defn init [pars]
-  (let [$aux (jq/$ :#aux)]
-    (set! *chw* (/ (.width $aux) (count "Loading...")))
-    (log "Using char width: " *chw* "px")
+(defn init []
+  (let [$aux (jq/$ :#aux)
+        text (.text $aux)]
+    (set! *chw* (/ (.width $aux) (count text)))
     (jq/remove $aux)
-    (move $cur-begin @cur-begin pars)
-    (move $cur-end @cur-end pars)))
+    (log "Using char width: " *chw* "px")))

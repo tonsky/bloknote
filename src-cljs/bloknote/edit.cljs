@@ -125,6 +125,6 @@
            (swap! pars replace-text @cur/cur-begin @cur/cur-end ""))
       nil)))
 
-(defn init [pars]
+(defn init []
   (.focus $ta))
 

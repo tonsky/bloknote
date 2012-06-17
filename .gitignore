@@ -11,3 +11,4 @@ pom.xml
 .lein-cljsbuild-compiler-*
 dependencies
 web/main.js
+bloknote.js

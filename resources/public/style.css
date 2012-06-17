@@ -30,9 +30,9 @@ body {  background: #CCC url(body.png); }
   color: #666;
   position: relative;
 }
-#sheet.focused, #ta:focus { outline: 4px solid rgba(0,150,255,0.3); outline-offset: 0px; color: #333; }
-#ta { position: absolute; right: 20px; top: 20px; width: 100px; height: 100px; }
-#cur-begin, #cur-end { background: url(cursor.png); width: 4px; height: 30px; position: absolute;}
+#sheet.focused, #ta:focus { outline: 4px solid rgba(0,150,255,0.3); outline-offset: 0px; color: #333;  z-index: 1;}
+#ta { position: fixed; left: 50%; top: 20px; width: 100px; height: 100px; z-index: 0;}
+#cur-begin, #cur-end { background: url(cursor.png); width: 4px; height: 30px; position: absolute; top: 20px; left: 100px; }
 #cur-begin { margin-left: 67px; background-position: 0 0; }
 #cur-end { margin-left: 69px; background-position: -2px 0; }
 
@@ -58,3 +58,6 @@ body {  background: #CCC url(body.png); }
 /*.block { padding-left: 40px; }
 .numlist, .list { margin-left: 40px; } */
 
+#titles { position: fixed; left: 40px; top: 20px; font-size: 13px; width: 200px; }
+#titles > li { background: white; margin: 10px 0; height: 30px; padding: 0 20px; cursor: pointer; }
+#titles > .selected { background: url(color.jpg) center center; cursor: default; }

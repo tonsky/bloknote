@@ -8,7 +8,7 @@
     :builds [{
         :source-path "src-cljs"
         :compiler {
-          :output-to "web/main.js"
+          :output-to "resources/public/bloknote.js"
           :externs   ["externs/jquery.js"]
           :optimizations :whitespace
           :pretty-print  true}}]}
