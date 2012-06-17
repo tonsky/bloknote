@@ -16,6 +16,11 @@
         c3 (compare (.-ch x) (.-ch y))]
     (if (zero? c1) (if (zero? c2) c3 c2) c1)))
 
+(defn pos->arr [pos]
+  [(.-par pos) (.-ln pos) (.-ch pos)])
+(defn arr->pos [[par ln ch]]
+  (Pos. par ln ch))
+
 (def ^:dynamic *chw* 10)        ; char width
 (def ^:dynamic *lh* 30)         ; line height
 

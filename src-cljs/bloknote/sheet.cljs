@@ -5,7 +5,7 @@
             [bloknote.cursor :as cur]
             [bloknote.edit :as edit]
             [cljs.reader :as reader])
-  (:use [jayq.util :only [log]]))
+  (:use [jayq.util :only [log clj->js js->clj]]))
 
 (def undo_limit 50)
 
@@ -36,14 +36,14 @@
   (.append $titles "<li class='title-new'>[ + Add Bloknote ]</li>"))
 
 (defn clear-sheet [text]
-  (jq/remove (jq/$ "#sheet p")))
-  ; (reset! pars (edit/split-to-pars text))
-  ; (doseq [par @pars]
-  ;   (jq/add-class (:dom par) "aux")
-  ;   (jq/append $sheet (:dom par)))
-  ;   (reset! cur/cur-begin (cur/Pos. 0 0 (count text)))
-  ;   (reset! cur/cur-end   (cur/Pos. 0 0 (count text)))
-  ;   (cur/repaint @pars))
+  (jq/remove (jq/$ "#sheet p"))
+  (reset! pars (edit/split-to-pars text))
+  (doseq [par @pars]
+    (jq/add-class (:dom par) "aux")
+    (jq/append $sheet (:dom par)))
+    (reset! cur/cur-begin (cur/Pos. 0 0 (count text)))
+    (reset! cur/cur-end   (cur/Pos. 0 0 (count text)))
+    (cur/repaint @pars))
 
 (defn init-sheet [b id]
   (let [{:keys [text cur-begin cur-end]} b]
@@ -52,14 +52,14 @@
     (jq/remove (jq/$ "#sheet .aux"))
     (doseq [par @pars]
       (jq/append $sheet (:dom par)))
-    (let [from (cur/Pos. (cur-begin 0) (cur-begin 1) (cur-begin 2))
-          to   (cur/Pos. (cur-end 0)   (cur-end 1)   (cur-end 2))]
-      (reset! cur/cur-begin from)
-      (reset! cur/cur-end to)
-      (cur/repaint @pars))
-    (let [title (first (str/split text #"\n" 2))]
+    (reset! cur/cur-begin (cur/arr->pos cur-begin))
+    (reset! cur/cur-end   (cur/arr->pos cur-end))
+    (cur/repaint @pars)
+    (let [title (first (str/split text #"\n" 2))
+          $title (jq/$ (str "#title-" id))]
       (log "title: " title ", id: #title-" id)
-      (jq/text (jq/$ (str "#title-" id)) title))
+      (jq/text $title title)
+      (jq/remove-class $title "progress"))
     (.focus edit/$ta)))
 
 (defn load-sheet [u sheet]
@@ -74,7 +74,7 @@
   (let [$t (jq/$ (.-target e))]
     (when-let [id (.data $t "bloknoteid")]
       (jq/remove-class (jq/$ "#titles > .selected") "selected")
-      (jq/add-class $t "selected")
+      (jq/add-class $t "selected progress")
       (load-sheet @user id))
     (when (jq/has-class $t "title-new")
       (let [id (str (rand-int 1000000000))
@@ -102,3 +102,13 @@
                   (render-titles titles last-opened-id)
                   (init-sheet last-opened last-opened-id)))}))
                   
+(defn save-sheet [u sheet pars]
+  (let [text      (str/join "\n" (mapv :text pars))
+        cur-begin (cur/pos->arr @cur/cur-begin)
+        cur-end   (cur/pos->arr @cur/cur-end)
+        payload   {:text text, :cur-begin cur-begin, :cur-end cur-end}
+        $title    (jq/$ (str "#title-" sheet))]
+    (jq/add-class $title "progress")
+    (jq/xhr [:post (str "/api/" u "/" sheet "/")]
+            (clj->js {:payload (pr-str payload)})
+            (fn [_] (jq/remove-class $title "progress")))))

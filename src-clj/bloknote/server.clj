@@ -40,6 +40,7 @@
    :headers {"Content-Type" "text/plain; charset=utf-8"}})
 
 (defn api-load [user id]
+  (Thread/sleep 1000)
   {:body    (pr-str (data/load-db user id))
    :headers {"Content-Type" "text/plain; charset=utf-8"}})
 

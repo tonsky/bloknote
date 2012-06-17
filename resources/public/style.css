@@ -61,3 +61,4 @@ body {  background: #CCC url(body.png); }
 #titles { position: fixed; left: 40px; top: 20px; font-size: 13px; width: 200px; }
 #titles > li { background: white; margin: 10px 0; height: 30px; padding: 0 20px; cursor: pointer; }
 #titles > .selected { background: url(color.jpg) center center; cursor: default; }
+#titles > li.progress { background: grey url(progress.gif); color: #fff; }
