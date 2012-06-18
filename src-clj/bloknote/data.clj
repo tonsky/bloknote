@@ -5,8 +5,12 @@
 (defn to-file [user]
   (file (str "data/" user ".clj")))
 
+(defmacro sync-for [user & body]
+  `(locking (.intern ~user)
+      ~@body)) 
+
 (defn read-user [user]
-  (locking (.intern user)
+  (sync-for user
     (-> (to-file user)
         slurp
         read-string)))
@@ -19,12 +23,12 @@
     {:text "# Great Expectations\n=============\n\nBy Charles Dickens" :cur-begin [3 0 0] :cur-end [3 0 0]}]))
            
 (defn load-db [user id]
-  (locking (.intern user)
+  (sync-for user
     (let [content (read-user user)]
       (get-in content [:bloknotes id] (default)))))
 
 (defn save-db [user id bloknote]
-  (locking (.intern user)
+  (sync-for user
     (let [f (to-file user)
           content (-> (read-user user)
                       (assoc-in [:bloknotes id] bloknote)
@@ -37,7 +41,7 @@
       first))
 
 (defn list-db [user]
-  (locking (.intern user)
+  (sync-for user
     (let [content (read-user user)
           titles  (for [[id b] (:bloknotes content)]
                        [(title b) id])
