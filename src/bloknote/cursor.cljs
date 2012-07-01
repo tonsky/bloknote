@@ -10,7 +10,7 @@
 ;     {:tags [[:text "more text"]]}]}]
 
 (defrecord Pos [par ln ch])
-(defn cmp [x y] 
+(defn cmp-pos [x y] 
   (let [c1 (compare (.-par x) (.-par y))
         c2 (compare (.-ln x) (.-ln y))
         c3 (compare (.-ch x) (.-ch y))]
@@ -106,8 +106,8 @@
       :processed)))
 
 (defn collapsed? []
-  ; (log "Collapsed " (cmp @cur-begin @cur-end))
-  (zero? (cmp @cur-begin @cur-end)))
+  ; (log "Collapsed " (cmp-pos @cur-begin @cur-end))
+  (zero? (cmp-pos @cur-begin @cur-end)))
 
 (defn init []
   (let [$aux (jq/$ :#aux)

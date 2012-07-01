@@ -79,7 +79,7 @@
     (apply str texts)))
 
 (defn normalize [pars pos-from pos-to]
-  (let [[pos-from pos-to] (if (pos? (cur/cmp pos-from pos-to))
+  (let [[pos-from pos-to] (if (pos? (cur/cmp-pos pos-from pos-to))
                             [pos-to pos-from]
                             [pos-from pos-to])]
     [(cur/Pos. (.-par pos-from) (.-ln pos-from) (min (.-ch pos-from) (cur/last-char pars (.-par pos-from) (.-ln pos-from))))

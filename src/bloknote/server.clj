@@ -1,5 +1,5 @@
 (ns bloknote.server
-  (:require [bloknote.data :as data]
+  (:require [bloknote.db :as db]
             [clojure.string :as str]
             compojure.core
             compojure.route
@@ -38,23 +38,24 @@
     (hiccup.element/javascript-tag (str "bloknote.sheet.init_user('" user "');"))))
 
 (defn api-list [user]
-  {:body    (pr-str (data/list-db user))
+  {:body    (pr-str (db/list-db user))
    :headers {"Content-Type" "text/plain; charset=utf-8"}})
 
 (defn api-load [user id]
   ; (Thread/sleep 1000)
-  {:body    (pr-str (data/load-db user id))
+  {:body    (pr-str (db/load-db user id))
    :headers {"Content-Type" "text/plain; charset=utf-8"}})
 
-(defn unescape [string]
-  (str/replace 
-    string #"\\x(..)" 
-    (fn [m] (str (char (Integer/parseInt (second m) 16))))))
+(defn- deserialize [string]
+  (read-string
+    (str/replace 
+      string #"\\x(..)" 
+      (fn [m] (str (char (Integer/parseInt (second m) 16)))))))
 
 (defn api-save [user id bloknote]
-  (data/save-db user id (read-string (unescape bloknote)))
+  (db/save-db user id (deserialize bloknote))
   {:status 201
-   :body (str "Bloknote " id " saved")
+   :body (str "Bloknote '" id "' saved")
    :headers {"Content-Type" "text/plain; charset=utf-8"}})
 
 (compojure.core/defroutes main-routes
@@ -68,5 +69,4 @@
 
 (def app
   (ring.middleware.reload/wrap-reload
-    (compojure.handler/site main-routes)
-    {:dirs ["src-clj"]}))
+    (compojure.handler/site main-routes)))

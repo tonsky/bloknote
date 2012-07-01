@@ -1,4 +1,4 @@
-(ns bloknote.data
+(ns bloknote.db
   (:use     clojure.java.io)
   (:require [clojure.string :as str]))
 
@@ -6,7 +6,7 @@
   (file (str "data/" user ".clj")))
 
 (defmacro sync-for [user & body]
-  `(locking (.intern ~user)
+  `(locking (.intern ~user) ; synchronizing by user's name
       ~@body)) 
 
 (defn read-user [user]

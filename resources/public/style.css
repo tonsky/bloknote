@@ -14,7 +14,7 @@ table { border-collapse: collapse; border-spacing: 0; }
 /* common elements */
 * { box-sizing: border-box; -moz-box-sizing: border-box; -ms-box-sizing: border-box; -webkit-box-sizing: border-box; }
 
-body, textarea { font: 16px/26px Consolas, 'Andale Mono', Monaco, Menlo, InconsolataMedium, 'Droid Sans Mono', monospace; letter-spacing: 0px;  }
+body, textarea { font: 16px/26px Menlo, Consolas, monospace; letter-spacing: 0px;  }
 body {  background: #CCC url(body.png); }
 
 ::selection { background: hsl(46, 100%, 50%); color: hsl(47, 44%, 6%); }
