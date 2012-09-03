@@ -2,6 +2,8 @@
   (:use [bloknote.editor :only [par-style split-to-tags Tag]]))
 
 (defn test-par-style []
+  (.log js/console "Testing test-par-style")
+
   ; Headers
   (let [s (par-style "### Header")]
     (assert (= (:style s) :header))
@@ -40,80 +42,37 @@
   (let [s (par-style "12.13.list")]
     (assert (= (:style s) :text))))
 
+(defn- tag-to-vec [tag]
+  (cond
+    (:attrs tag)          [(:name tag) (:text tag) (:attrs tag)]
+    (= (:name tag) :span) (:text tag)
+    :else                 [(:name tag) (:text tag)]))
+
+(defn- split-to-vec [text]
+  (map tag-to-vec (split-to-tags text)))
+
 (defn test-split-to-tags []
-  (let [tags (split-to-tags "How *are* you?")
-        [t1 t2 t3 t4 t5] tags]
-    (assert (= (Tag. "How "  :span nil) t1))
-    (assert (= (Tag. "*"     :span nil) t2))
-    (assert (= (Tag. "are"   :em   nil) t3))
-    (assert (= (Tag. "*"     :span nil) t4))
-    (assert (= (Tag. " you?" :span nil) t5)))
+  (.log js/console "Testing test-split-to-tags")
+  (assert (= (split-to-vec "How *are* you?")
+             ["How " "*" [:em "are"] "*" " you?"]))
   ; Some edge cases
-  (let [tags (split-to-tags "*How* are *you?* or*not you* in*the*word *end*")
-        [t1 t2 t3 t4 t5 t6 t7 t8 t9 t10 t11] tags]
-    (assert (= (Tag. "*"       :span nil) t1))
-    (assert (= (Tag. "How"     :em nil)   t2))
-    (assert (= (Tag. "*"       :span nil) t3))
-    (assert (= (Tag. " are "   :span nil) t4))
-    (assert (= (Tag. "*"       :span nil) t5))
-    (assert (= (Tag. "you?"    :em   nil) t6))
-    (assert (= (Tag. "*"       :span nil) t7))
-    (assert (= (Tag. " or*not you* in*the*word " :span nil) t8))
-    (assert (= (Tag. "*"       :span nil) t9))
-    (assert (= (Tag. "end"     :em   nil) t10))
-    (assert (= (Tag. "*"       :span nil) t11)))
+  (assert (= (split-to-vec "*How* are *you?* or*not you* in*the*word *end*")
+             ["*" [:em "How"] "*" " are " "*" [:em "you?"] "*" " or*not you* in*the*word " "*" [:em "end"] "*"]))
   ; Same for 'strong' tag
-  (let [tags (split-to-tags "**How** are **you?** or**not you** in**the**word **end**")
-        [t1 t2 t3 t4 t5 t6 t7 t8 t9 t10 t11] tags]
-    (assert (= (Tag. "**"      :span   nil) t1))
-    (assert (= (Tag. "How"     :strong nil) t2))
-    (assert (= (Tag. "**"      :span   nil) t3))
-    (assert (= (Tag. " are "   :span   nil) t4))
-    (assert (= (Tag. "**"      :span   nil) t5))
-    (assert (= (Tag. "you?"    :strong nil) t6))
-    (assert (= (Tag. "**"      :span   nil) t7))
-    (assert (= (Tag. " or**not you** in**the**word " :span nil) t8))
-    (assert (= (Tag. "**"      :span   nil) t9))
-    (assert (= (Tag. "end"     :strong nil) t10))
-    (assert (= (Tag. "**"      :span   nil) t11)))
+  (assert (= (split-to-vec "**How** are **you?** or**not you** in**the**word **end**")
+             ["**" [:strong "How"] "**" " are " "**" [:strong "you?"] "**" " or**not you** in**the**word " "**" [:strong "end"] "**"]))
   ; Nesting stuff, *strong* preceeds *em*
-  (let [tags (split-to-tags "**strong *italic* strong** span *italic **strong** italic*")
-        [t1 t2 t3 t4 t5 t6 t7 t8 t9 t10 t11 t12] tags]
-    (assert (= (Tag. "**"             :span   nil) t1))
-    (assert (= (Tag. "strong "        :strong nil) t2))
-    (assert (= (Tag. "*"              :strong nil) t3))
-    (assert (= (Tag. "italic"         :em     nil) t4))
-    (assert (= (Tag. "*"              :strong nil) t5))
-    (assert (= (Tag. " strong"        :strong nil) t6))
-    (assert (= (Tag. "**"             :span   nil) t7))
-    (assert (= (Tag. " span *italic " :span   nil) t8))
-    (assert (= (Tag. "**"             :span   nil) t9))
-    (assert (= (Tag. "strong"         :strong nil) t10))
-    (assert (= (Tag. "**"             :span   nil) t11))
-    (assert (= (Tag. " italic*"       :span   nil) t12)))
+  (assert (= (split-to-vec "**strong *italic* strong** span *italic **strong** italic*")
+             ["**" [:strong "strong "] [:strong "*"] [:em "italic"] [:strong "*"] [:strong " strong"] "**" " span *italic " "**" [:strong "strong"] "**" " italic*"]))
   ; URLs
-  (let [tags (split-to-tags "Do you mean www.ya.ru:8080?")
-        [t1 t2 t3] tags]
-    (assert (= (Tag. "Do you mean "   :span nil) t1))
-    (assert (= (Tag. "www.ya.ru:8080" :a {:href "http://www.ya.ru:8080"}) t2))
-    (assert (= (Tag. "?"              :span nil) t3)))
+  (assert (= (split-to-vec "Do you mean www.ya.ru:8080?")
+             ["Do you mean " [:a "www.ya.ru:8080" {:href "http://www.ya.ru:8080"}] "?"]))
   ; Nesting URLs
-  (let [tags (split-to-tags "*em http://twitter.com/* and **strong https://facebook.ru**")
-        [t1 t2 t3 t4 t5 t6 t7 t8 t9] tags]
-    (assert (= (Tag. "*"       :span nil)   t1))
-    (assert (= (Tag. "em "     :em   nil)   t2))
-    (assert (= (Tag. "http://twitter.com/" :a {:href "http://twitter.com/"}) t3))
-    (assert (= (Tag. "*"       :span nil)   t4))
-    (assert (= (Tag. " and "   :span nil)   t5))
-    (assert (= (Tag. "**"      :span nil)   t6))
-    (assert (= (Tag. "strong " :strong nil) t7))
-    (assert (= (Tag. "https://facebook.ru" :a {:href "https://facebook.ru"}) t8))
-    (assert (= (Tag. "**"      :span nil) t9))))
+  (assert (= (split-to-vec "*em http://twitter.com/* and **strong https://facebook.ru**")
+             ["*" [:em "em "] [:a "http://twitter.com/" {:href "http://twitter.com/"}] "*" " and " "**" [:strong "strong "] [:a "https://facebook.ru" {:href "https://facebook.ru"}] "**"])))
 
 (defn ^:export run []
-  (.log js/console "Testing test-par-style")
   (test-par-style)
-  (.log js/console "Testing test-split-to-tags")
   (test-split-to-tags)
   0)
 

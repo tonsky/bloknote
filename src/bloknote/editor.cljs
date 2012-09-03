@@ -25,8 +25,8 @@
 ;   2. list
 ; 100. list
 
-(def ^:dynamic par-width 64)
-(def ^:dynamic left-margin 7)
+(def ^:dynamic *par-width* 64)
+(def ^:dynamic *left-margin* 7)
 
 (declare split-to-tags)
 (declare par-style)
@@ -46,10 +46,10 @@
   
 (defn par-style [text]
   (condp re-matches text
-    #"(#+ ).*"          :>> (fn [[_ m]] {:style :header, :offset 0, :first-line-offset (- (min (count m) left-margin))})
+    #"(#+ ).*"          :>> (fn [[_ m]] {:style :header, :offset 0, :first-line-offset (- (min (count m) *left-margin*))})
     #"(> ).*"                           {:style :blockquote, :offset 2, :first-line-offset 0}
-    #"([*+\-−—–•]+ ).*" :>> (fn [[_ m]] {:style :ul, :offset 0, :first-line-offset (- (min (count m) left-margin))})
-    #"((?:\d+\.)+ ).*"  :>> (fn [[_ m]] {:style :ol, :offset 0, :first-line-offset (- (min (count m) left-margin))})
+    #"([*+\-−—–•]+ ).*" :>> (fn [[_ m]] {:style :ul, :offset 0, :first-line-offset (- (min (count m) *left-margin*))})
+    #"((?:\d+\.)+ ).*"  :>> (fn [[_ m]] {:style :ol, :offset 0, :first-line-offset (- (min (count m) *left-margin*))})
                                         {:style :text, :offset 0, :first-line-offset 0}))
 
 (defn normalize-href [s]
